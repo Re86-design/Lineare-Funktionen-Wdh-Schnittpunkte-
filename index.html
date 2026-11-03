@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Lineare Funktionen – Wiederholung</title>
+<style>
+  :root{
+    --bg:#f3f4f6; --card:#fff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --soft:#f6f7f9;
+    --f:#2563eb; --g:#ea580c; --ok:#15803d; --okbg:#edf7f0; --bad:#b45309; --badbg:#fdf4e7;
+    --hint:#7a5a12; --hintbg:#fbf6e9; --accent:#374151;
+    color-scheme: light;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;
+       -webkit-tap-highlight-color:transparent}
+  header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px 12px}
+  .hrow{display:flex;justify-content:space-between;align-items:center;max-width:520px;margin:0 auto}
+  .htitle{font-weight:700;font-size:16px}
+  #timer{font-variant-numeric:tabular-nums;font-weight:700;background:var(--soft);border:1px solid var(--line);padding:2px 10px;border-radius:999px;font-size:14px}
+  #timer.late{background:var(--badbg);color:var(--bad);border-color:#f3d9b5}
+  .progress{display:flex;gap:6px;max-width:520px;margin:9px auto 0}
+  .progress span{flex:1;height:6px;border-radius:3px;background:var(--line);transition:background .3s}
+  .progress span.cur{background:#9ca3af}
+  .progress span.done{background:var(--ok)}
+  .progress span.shown{background:#d6a24a}
+  main{max-width:520px;margin:0 auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 16px 20px;display:none}
+  .card.active{display:block;animation:slide .3s ease}
+  @keyframes slide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h2{margin:2px 0 6px;font-size:20px}
+  .tag{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  p{margin:8px 0}
+  .q{font-weight:600;margin-top:14px}
+  .fn{font-weight:700;white-space:nowrap}
+  .fn.f{color:var(--f)} .fn.g{color:var(--g)}
+  .fnbox{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:10px 0;font-size:18px}
+  svg.board{width:100%;height:auto;display:block;margin:10px 0;background:#fff;border:1px solid var(--line);border-radius:12px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+  svg#b2{touch-action:none}
+  .gl{stroke:#eef0f3;stroke-width:1}
+  .ax{stroke:#333;stroke-width:1.5}
+  .axl{font-size:10px;fill:#555}
+  .axn{font-size:13px;font-style:italic;fill:#333;font-weight:700}
+  .lf{stroke:var(--f);stroke-width:3;fill:none;stroke-linecap:round}
+  .lg{stroke:var(--g);stroke-width:3;fill:none;stroke-linecap:round}
+  .grow{animation:fade .5s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .rubber{stroke-width:3;stroke-dasharray:6 5;stroke-linecap:round}
+  .tri{fill:none;stroke-width:2;stroke-dasharray:5 3}
+  .tri.f{stroke:var(--f)} .tri.g{stroke:var(--g)}
+  .trifill.f{fill:rgba(37,99,235,.08)} .trifill.g{fill:rgba(234,88,12,.08)}
+  .tril{font-size:11px;font-weight:700}
+  .pf{fill:var(--f)} .pg{fill:var(--g)} .ps{fill:var(--ok)}
+  .pl{font-size:11px;font-weight:700}
+  .help{stroke:var(--ok);stroke-width:1.5;stroke-dasharray:4 3}
+  .ring{fill:none;stroke-width:2.5;animation:ring 1.3s ease-out infinite}
+  @keyframes ring{0%{opacity:.9}100%{opacity:0}}
+  .wrong{fill:#dc2626;animation:wr .9s forwards}
+  @keyframes wr{0%{opacity:.9}100%{opacity:0}}
+  .usage{font-size:13px;color:var(--muted);background:var(--soft);border-radius:8px;padding:7px 10px;margin:6px 0}
+  .inputs{display:flex;align-items:center;justify-content:center;gap:6px;margin:12px 0;font-size:21px;font-weight:600;flex-wrap:wrap}
+  .inputs input{width:76px;font-size:19px;font-weight:600;padding:8px;border:1.5px solid #cbd0d8;border-radius:10px;text-align:center;color:var(--ink);background:#fff}
+  .inputs input:focus{outline:none;border-color:var(--accent)}
+  .inputs.txt{font-size:17px;font-weight:500;justify-content:flex-start}
+  button{font:inherit;font-weight:600;border:none;border-radius:12px;padding:12px 16px;cursor:pointer;transition:transform .1s}
+  button:active{transform:scale(.98)}
+  .btn{background:var(--accent);color:#fff}
+  .btn2{background:#eceef1;color:var(--ink)}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .row button{flex:1}
+  .mc{margin:8px 0}
+  .mclbl{font-size:14px;color:var(--muted);margin-bottom:4px}
+  .opts{display:flex;gap:6px;flex-wrap:wrap}
+  .opts button{flex:1;min-width:30%;background:#fff;border:1.5px solid #cbd0d8;color:var(--ink);padding:10px 6px;font-size:15px;white-space:nowrap}
+  .opts button.sel{border-color:var(--accent);background:#eceef1}
+  .opts button.right{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
+  .opts button:disabled{cursor:default}
+  .fb{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:15px;display:none}
+  .fb.ok{display:block;background:var(--okbg);color:var(--ok)}
+  .fb.bad{display:block;background:var(--badbg);color:var(--bad)}
+  .fb.hint{display:block;background:var(--hintbg);color:var(--hint)}
+  .hidden{display:none!important}
+  .intro{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+  .intro div{display:flex;align-items:center;gap:12px;background:var(--soft);border-radius:10px;padding:9px 12px}
+  .intro .ic{font-weight:700;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+  .intro b{display:block}
+  .intro small{color:var(--muted)}
+  .sum{list-style:none;padding:0;margin:12px 0}
+  .sum li{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+  .stars{font-size:34px;text-align:center;letter-spacing:6px;margin:6px 0}
+  .stars .off{filter:grayscale(1);opacity:.3}
+  .big{font-size:20px;font-weight:700;text-align:center;margin:4px 0}
+  .small{font-size:13px;color:var(--muted)}
+  .burst{position:fixed;pointer-events:none;font-size:22px;z-index:50;animation:burst 1s ease-out forwards}
+  @keyframes burst{0%{opacity:1;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.1)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow"><span class="htitle">Lineare Funktionen</span><span id="timer">5:00</span></div>
+  <div class="progress"><span id="pg1"></span><span id="pg2"></span><span id="pg3"></span><span id="pg4"></span></div>
+</header>
+
+<main>
+  <!-- Start -->
+  <section class="card active" id="c0">
+    <div class="tag">Wiederholung · 8. Klasse</div>
+    <h2>Wo schneiden sich die Geraden?</h2>
+    <p>Du hast <b>5 Minuten</b> für 4 kurze Aufgaben:</p>
+    <div class="intro">
+      <div><span class="ic">1</span><span><b>Ablesen</b><small>Schnittpunkt im Koordinatensystem finden</small></span></div>
+      <div><span class="ic">2</span><span><b>Zeichnen</b><small>Zwei Geraden zeichnen und Schnittpunkt ablesen</small></span></div>
+      <div><span class="ic">3</span><span><b>Rechnen</b><small>Schnittpunkt im Heft berechnen</small></span></div>
+      <div><span class="ic">4</span><span><b>Anwenden</b><small>Eine Sachaufgabe zum Schwimmbad lösen</small></span></div>
+    </div>
+    <p class="small">Dezimalzahlen kannst du mit Komma eingeben, z.&nbsp;B. 1,5.</p>
+    <div class="row"><button class="btn" onclick="start()">Los geht's</button></div>
+  </section>
+
+  <!-- Aufgabe 1 -->
+  <section class="card" id="c1">
+    <div class="tag">Aufgabe 1 · Ablesen</div>
+    <h2>Lies den Schnittpunkt ab</h2>
+    <p>Die Geraden <span class="fn f">g₁</span> und <span class="fn g">g₂</span> schneiden sich im Punkt S. Gib seine Koordinaten an.</p>
+    <svg class="board" id="b1"></svg>
+    <div class="inputs">S ( <input id="a1x" inputmode="decimal" autocomplete="off"> | <input id="a1y" inputmode="decimal" autocomplete="off"> )</div>
+    <div class="row"><button class="btn" id="chk1" onclick="check1()">Prüfen</button></div>
+    <div class="row hidden" id="sol1row"><button class="btn2" onclick="reveal1()">Lösung anzeigen</button></div>
+    <div class="fb" id="fb1"></div>
+    <div class="row hidden" id="next1"><button class="btn" onclick="go(2)">Weiter zu Aufgabe 2 →</button></div>
+  </section>
+
+  <!-- Aufgabe 2 -->
+  <section class="card" id="c2">
+    <div class="tag">Aufgabe 2 · Zeichnen</div>
+    <h2>Zeichne die Graphen</h2>
+    <div class="fnbox"><span class="fn f">f(x) = −½x + 3</span><span class="fn g">g(x) = x − 3</span></div>
+    <p>Zeichne die Graphen von f und g, wie du es in der Schule gelernt hast. Lies dann den Schnittpunkt S ab.</p>
+    <div class="usage"><b>Punkt setzen:</b> auf einen Gitterpunkt tippen · <b>Verbinden:</b> mit dem Finger (oder der Maus) von einem Punkt zum anderen ziehen</div>
+    <svg class="board" id="b2"></svg>
+    <div id="s2box" class="hidden">
+      <div class="inputs">S ( <input id="a2x" inputmode="decimal" autocomplete="off"> | <input id="a2y" inputmode="decimal" autocomplete="off"> )</div>
+      <div class="row"><button class="btn" id="chk2" onclick="check2()">Prüfen</button></div>
+      <div class="row hidden" id="sol2row"><button class="btn2" onclick="reveal2()">Lösung anzeigen</button></div>
+    </div>
+    <div class="fb" id="fb2"></div>
+    <div class="row"><button class="btn2" id="reset2" onclick="reset2()">↺ Neu beginnen</button></div>
+    <div class="row hidden" id="next2"><button class="btn" onclick="go(3)">Weiter zu Aufgabe 3 →</button></div>
+  </section>
+
+  <!-- Aufgabe 3 -->
+  <section class="card" id="c3">
+    <div class="tag">Aufgabe 3 · Rechnen</div>
+    <h2>Berechne den Schnittpunkt</h2>
+    <p>Bestimme <b>rechnerisch in deinem Heft</b> den Schnittpunkt S der Graphen von</p>
+    <div class="fnbox"><span class="fn f">f(x) = 3x − 4</span><span class="fn g">g(x) = −x + 6</span></div>
+    <p>Gib dann die Koordinaten ein.</p>
+    <div class="inputs">S ( <input id="a3x" inputmode="decimal" autocomplete="off"> | <input id="a3y" inputmode="decimal" autocomplete="off"> )</div>
+    <div class="row"><button class="btn" id="chk3" onclick="check3()">Prüfen</button></div>
+    <div class="row hidden" id="sol3row"><button class="btn2" onclick="reveal3()">Lösung anzeigen</button></div>
+    <div class="fb" id="fb3"></div>
+    <div id="b3box" class="hidden">
+      <p class="small" style="margin-top:12px">So sieht dein Ergebnis im Koordinatensystem aus:</p>
+      <svg class="board" id="b3"></svg>
+    </div>
+    <div class="row hidden" id="next3"><button class="btn" onclick="go(4)">Weiter zu Aufgabe 4 →</button></div>
+  </section>
+
+  <!-- Aufgabe 4 -->
+  <section class="card" id="c4">
+    <div class="tag">Aufgabe 4 · Anwenden</div>
+    <h2>Lohnt sich die Jahreskarte?</h2>
+    <p>Im Schwimmbad kostet ein Eintritt <b>4 €</b>. Mit einer Jahreskarte zahlt man einmalig <b>30 €</b> und dann nur noch <b>1,50 €</b> pro Besuch.</p>
+    <p class="q">a) Wähle für beide Angebote den passenden Funktionsterm.<br><span class="small" style="font-weight:400">x: Anzahl der Besuche, y: Kosten in €</span></p>
+    <div class="mc"><div class="mclbl">Ohne Karte:</div>
+      <div class="opts" id="optA">
+        <button data-v="0">y = x + 4</button><button data-v="1">y = 4x</button><button data-v="0">y = 4</button>
+      </div></div>
+    <div class="mc"><div class="mclbl">Mit Jahreskarte:</div>
+      <div class="opts" id="optB">
+        <button data-v="0">y = 30x + 1,5</button><button data-v="0">y = 31,5x</button><button data-v="1">y = 1,5x + 30</button>
+      </div></div>
+    <div class="row"><button class="btn" id="chk4a" onclick="check4a()">Prüfen</button></div>
+    <div class="row hidden" id="sol4arow"><button class="btn2" onclick="reveal4a()">Lösung anzeigen</button></div>
+    <div class="fb" id="fb4a"></div>
+
+    <div id="p4b" class="hidden">
+      <p class="q">b) Berechne im Heft: Bei wie vielen Besuchen kosten beide Angebote gleich viel? Wie hoch sind dann die Kosten?</p>
+      <div class="inputs txt" style="gap:10px 16px"><span style="white-space:nowrap"><input id="a4x" inputmode="decimal" autocomplete="off"> Besuche</span><span style="white-space:nowrap">Kosten: <input id="a4y" inputmode="decimal" autocomplete="off"> €</span></div>
+      <p class="q">c) Ab wie vielen Besuchen ist die Jahreskarte günstiger?</p>
+      <div class="inputs txt">ab <input id="a4z" inputmode="decimal" autocomplete="off"> Besuchen</div>
+      <div class="row"><button class="btn" id="chk4b" onclick="check4b()">Prüfen</button></div>
+      <div class="row hidden" id="sol4brow"><button class="btn2" onclick="reveal4b()">Lösung anzeigen</button></div>
+      <div class="fb" id="fb4b"></div>
+    </div>
+    <div class="row hidden" id="next4"><button class="btn" onclick="finish()">Zur Auswertung →</button></div>
+  </section>
+
+  <!-- Auswertung -->
+  <section class="card" id="c5">
+    <div class="tag">Auswertung</div>
+    <h2 id="endtitle">Geschafft!</h2>
+    <div class="stars" id="stars"></div>
+    <div class="big" id="score"></div>
+    <ul class="sum" id="sumlist"></ul>
+    <p class="small" id="timeinfo"></p>
+    <p class="small">Zeige dieses Ergebnis deiner Lehrkraft.</p>
+    <div class="row"><button class="btn2" onclick="location.reload()">↺ Noch einmal</button></div>
+  </section>
+</main>
+
+<script>
+/* ---------- Koordinatensystem ---------- */
+const MIN=-6, MAX=6, U=26, PAD=16, SIZE=PAD*2+(MAX-MIN)*U;
+const NS='http://www.w3.org/2000/svg';
+const sx=x=>PAD+(x-MIN)*U, sy=y=>PAD+(MAX-y)*U;
+const fmt=n=>String(n).replace('.',',').replace('-','−');
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!==undefined)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+
+function setupBoard(id){
+  const svg=document.getElementById(id);
+  svg.setAttribute('viewBox',`0 0 ${SIZE} ${SIZE}`);
+  const defs=el('defs',{},svg);
+  const cp=el('clipPath',{id:id+'clip'},defs);
+  el('rect',{x:sx(MIN),y:sy(MAX),width:(MAX-MIN)*U,height:(MAX-MIN)*U},cp);
+  const grid=el('g',{},svg);
+  for(let i=MIN;i<=MAX;i++){
+    el('line',{x1:sx(i),y1:sy(MIN),x2:sx(i),y2:sy(MAX),class:'gl'},grid);
+    el('line',{x1:sx(MIN),y1:sy(i),x2:sx(MAX),y2:sy(i),class:'gl'},grid);
+  }
+  el('line',{x1:sx(MIN),y1:sy(0),x2:sx(MAX)+6,y2:sy(0),class:'ax'},grid);
+  el('line',{x1:sx(0),y1:sy(MIN),x2:sx(0),y2:sy(MAX)-6,class:'ax'},grid);
+  el('polygon',{points:`${sx(MAX)+11},${sy(0)} ${sx(MAX)+2},${sy(0)-4.5} ${sx(MAX)+2},${sy(0)+4.5}`,fill:'#333'},grid);
+  el('polygon',{points:`${sx(0)},${sy(MAX)-11} ${sx(0)-4.5},${sy(MAX)-2} ${sx(0)+4.5},${sy(MAX)-2}`,fill:'#333'},grid);
+  el('text',{x:sx(MAX)+1,y:sy(0)-8,class:'axn'},grid,'x');
+  el('text',{x:sx(0)+8,y:sy(MAX)-1,class:'axn'},grid,'y');
+  for(let i=MIN+1;i<MAX;i++){
+    if(i===0)continue;
+    el('line',{x1:sx(i),y1:sy(0)-3,x2:sx(i),y2:sy(0)+3,class:'ax'},grid);
+    el('line',{x1:sx(0)-3,y1:sy(i),x2:sx(0)+3,y2:sy(i),class:'ax'},grid);
+    el('text',{x:sx(i),y:sy(0)+13,'text-anchor':'middle',class:'axl'},grid,fmt(i));
+    el('text',{x:sx(0)-5,y:sy(i)+3.5,'text-anchor':'end',class:'axl'},grid,fmt(i));
+  }
+  el('text',{x:sx(0)-5,y:sy(0)+13,'text-anchor':'end',class:'axl'},grid,'0');
+  const lines=el('g',{'clip-path':`url(#${id}clip)`},svg);
+  const extra=el('g',{},svg);
+  const pts=el('g',{},svg);
+  const top=el('g',{},svg);
+  return {svg,lines,extra,pts,top};
+}
+function drawLine(b,m,t,cls,label){
+  el('line',{x1:sx(MIN-1),y1:sy(m*(MIN-1)+t),x2:sx(MAX+1),y2:sy(m*(MAX+1)+t),class:cls+' grow'},b.lines);
+  if(label){
+    for(let x=5.3;x>MIN;x-=0.5){const y=m*x+t;if(y<MAX-0.5&&y>MIN+0.5){
+      el('text',{x:sx(x)+4,y:sy(y)-7,class:'pl',fill:cls==='lf'?'var(--f)':'var(--g)'},b.extra,label);break;}}
+  }
+}
+function drawPoint(b,x,y,cls,label){
+  const c=el('circle',{cx:sx(x),cy:sy(y),r:6.5,class:cls+' grow',stroke:'#fff','stroke-width':2},b.pts);
+  if(label)el('text',{x:sx(x)+8,y:sy(y)-8,class:'pl',fill:cls==='pf'?'var(--f)':cls==='pg'?'var(--g)':'var(--ok)'},b.pts,label);
+  return c;
+}
+function markS(b,x,y){
+  el('line',{x1:sx(x),y1:sy(y),x2:sx(x),y2:sy(0),class:'help grow'},b.extra);
+  el('line',{x1:sx(x),y1:sy(y),x2:sx(0),y2:sy(y),class:'help grow'},b.extra);
+  el('circle',{cx:sx(x),cy:sy(y),r:11,class:'ring',stroke:'var(--ok)'},b.top);
+  drawPoint(b,x,y,'ps',`S(${fmt(x)} | ${fmt(y)})`);
+}
+function flashWrong(b,x,y){const c=el('circle',{cx:sx(x),cy:sy(y),r:7,class:'wrong'},b.top);setTimeout(()=>c.remove(),950);}
+function toSvg(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse());}
+const toGrid=p=>({x:(p.x-PAD)/U+MIN,y:MAX-(p.y-PAD)/U});
+
+/* ---------- Hilfen ---------- */
+function parseNum(s){
+  s=(s||'').trim().replace(/\s/g,'').replace(/−/g,'-').replace(',','.');
+  if(!s)return NaN;
+  if(s.includes('/')){const [a,b]=s.split('/');const r=parseFloat(a)/parseFloat(b);return isFinite(r)?r:NaN;}
+  if(!/^[-+]?\d*\.?\d+$/.test(s))return NaN;
+  return parseFloat(s);
+}
+const near=(a,b)=>Math.abs(a-b)<1e-6;
+function fb(id,type,html){const e=document.getElementById(id);e.className='fb '+type;e.innerHTML=html;}
+const show=id=>document.getElementById(id).classList.remove('hidden');
+const hide=id=>document.getElementById(id).classList.add('hidden');
+const N=4;
+const res=[null,null,null,null,null];
+const errs=[0,0,0,0,0];
+const praise=['Super!','Stark!','Klasse!','Genau richtig!','Sehr gut!'];
+const randPraise=()=>praise[Math.floor(Math.random()*praise.length)];
+function celebrate(target){
+  const r=(target||document.body).getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+Math.min(r.height/2,200);
+  const em=['🎉','⭐','✨'];
+  for(let i=0;i<10;i++){
+    const s=document.createElement('span');s.className='burst';s.textContent=em[i%em.length];
+    const a=Math.random()*Math.PI*2, d=50+Math.random()*70;
+    s.style.left=cx+'px';s.style.top=cy+'px';
+    s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',Math.sin(a)*d-30+'px');
+    document.body.appendChild(s);setTimeout(()=>s.remove(),1100);
+  }
+}
+
+/* ---------- Navigation & Timer ---------- */
+let t0=null, timerId=null;
+function start(){t0=Date.now();timerId=setInterval(tick,250);tick();go(1);}
+function tick(){
+  const left=300-Math.floor((Date.now()-t0)/1000);
+  const e=document.getElementById('timer');
+  const a=Math.abs(left);
+  e.textContent=(left<0?'+':'')+Math.floor(a/60)+':'+String(a%60).padStart(2,'0');
+  e.classList.toggle('late',left<=0);
+}
+function go(n){
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  document.getElementById('c'+n).classList.add('active');
+  for(let i=1;i<=N;i++){
+    document.getElementById('pg'+i).className=res[i]==='ok'?'done':res[i]==='shown'?'shown':(i===n?'cur':'');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function markDone(n,how){res[n]=how;document.getElementById('pg'+n).className=how==='ok'?'done':'shown';}
+
+/* ---------- Aufgabe 1 ---------- */
+const b1=setupBoard('b1');
+drawLine(b1,2,-3,'lf','g₁');
+drawLine(b1,-1,3,'lg','g₂');
+function check1(){
+  if(res[1])return;
+  const x=parseNum(a1x.value), y=parseNum(a1y.value);
+  if(isNaN(x)||isNaN(y)){fb('fb1','hint','Trage bitte beide Koordinaten als Zahl ein.');return;}
+  if(near(x,2)&&near(y,1)){
+    fb('fb1','ok',`${randPraise()} S(2 | 1)`);markS(b1,2,1);celebrate(document.getElementById('b1'));
+    markDone(1,'ok');hide('chk1');hide('sol1row');show('next1');
+  }else{
+    errs[1]++;
+    if(near(x,1)&&near(y,2))fb('fb1','bad','Fast! Du hast x und y vertauscht. Zuerst kommt der x-Wert (nach rechts), dann der y-Wert (nach oben).');
+    else fb('fb1','bad','Noch nicht. Suche den Punkt, an dem sich die blaue und die orange Gerade kreuzen. Gehe von dort <b>senkrecht zur x-Achse</b> und <b>waagrecht zur y-Achse</b>.');
+    if(errs[1]>=2)show('sol1row');
+  }
+}
+function reveal1(){
+  markS(b1,2,1);a1x.value='2';a1y.value='1';
+  fb('fb1','hint','Lösung: S(2 | 1). Die grünen Hilfslinien zeigen, wie man abliest.');
+  markDone(1,'shown');hide('chk1');hide('sol1row');show('next1');
+}
+
+/* ---------- Aufgabe 2 ---------- */
+const F=[
+  {name:'f',m:-0.5,t:3,cls:'f',pc:'pf',lc:'lf',
+   mHint:'Tipp: m = −½ bedeutet: <b>2 nach rechts</b> und <b>1 nach unten</b>.',
+   tHint:'Tipp: Bei f(x) = −½x <b>+ 3</b> ist der y-Achsenabschnitt t = 3.'},
+  {name:'g',m:1,t:-3,cls:'g',pc:'pg',lc:'lg',
+   mHint:'Tipp: m = 1 bedeutet: <b>1 nach rechts</b> und <b>1 nach oben</b>.',
+   tHint:'Tipp: Bei g(x) = x <b>− 3</b> ist der y-Achsenabschnitt t = −3.'}
+];
+let b2, st, drag=null, downPos=null, rings=[];
+function newState(){return {done:[false,false],cur:null,step:'t',p2:null,err:0};}
+function initBoard2(){
+  const old=document.getElementById('b2');
+  const fresh=old.cloneNode(false);old.parentNode.replaceChild(fresh,old);
+  b2=setupBoard('b2');
+  const svg=b2.svg;
+  svg.addEventListener('pointerdown',onDown);
+  svg.addEventListener('pointermove',onMove);
+  svg.addEventListener('pointerup',onUp);
+  svg.addEventListener('pointercancel',()=>{if(drag){drag.rubber.remove();drag=null;}downPos=null;});
+}
+function onDown(e){
+  e.preventDefault();
+  const p=toSvg(b2.svg,e);downPos=p;
+  if(st.step==='line'){
+    const g=toGrid(p), f=F[st.cur];
+    const ends=[[0,f.t],st.p2];
+    for(let i=0;i<2;i++){
+      const [ex,ey]=ends[i];
+      if(Math.hypot(g.x-ex,g.y-ey)<0.8){
+        const [ox,oy]=ends[1-i];
+        drag={to:[ox,oy],rubber:el('line',{x1:sx(ex),y1:sy(ey),x2:p.x,y2:p.y,class:'rubber',stroke:`var(--${f.cls})`},b2.top)};
+        try{b2.svg.setPointerCapture(e.pointerId);}catch(_){}
+        return;
+      }
+    }
+  }
+}
+function onMove(e){
+  if(!drag)return;
+  const p=toSvg(b2.svg,e);
+  drag.rubber.setAttribute('x2',p.x);drag.rubber.setAttribute('y2',p.y);
+}
+function onUp(e){
+  const p=toSvg(b2.svg,e);
+  if(drag){
+    const g=toGrid(p);const [tx,ty]=drag.to;
+    drag.rubber.remove();
+    if(Math.hypot(g.x-tx,g.y-ty)<0.8){drag=null;connected();}
+    else{drag=null;fb('fb2','hint','Ziehe deinen Finger ganz bis zum <b>anderen Punkt</b> und lass erst dort los.');}
+    downPos=null;return;
+  }
+  if(downPos&&Math.hypot(p.x-downPos.x,p.y-downPos.y)<12){
+    const g=toGrid(p);const gx=Math.round(g.x), gy=Math.round(g.y);
+    if(gx>=MIN&&gx<=MAX&&gy>=MIN&&gy<=MAX)tap2(gx,gy);
+  }
+  downPos=null;
+}
+function reset2(){
+  initBoard2();st=newState();drag=null;rings=[];
+  ['a2x','a2y'].forEach(i=>document.getElementById(i).value='');
+  hide('s2box');hide('next2');hide('sol2row');show('chk2');show('reset2');
+  document.getElementById('fb2').className='fb';
+  if(res[2]){res[2]=null;document.getElementById('pg2').className='cur';}
+  errs[2]=0;
+}
+function wrong2(x,y,html){flashWrong(b2,x,y);st.err++;errs[2]++;fb('fb2','bad',html);}
+function tap2(x,y){
+  if(st.step==='s')return;
+  if(st.step==='line'){
+    fb('fb2','hint','Verbinde jetzt deine beiden Punkte: Lege den Finger auf einen Punkt und <b>ziehe zum anderen</b>.');
+    return;
+  }
+  if(st.step==='t'){
+    const i=F.findIndex((f,k)=>!st.done[k]&&x===0&&y===f.t);
+    if(i>=0){
+      const f=F[i];st.cur=i;
+      drawPoint(b2,0,f.t,f.pc,'');
+      st.step='m';st.err=0;fb('fb2','ok',`Guter Start für <b>${f.name}</b>!`);
+      return;
+    }
+    const open=F.filter((f,k)=>!st.done[k]);
+    if(st.err===0)wrong2(x,y,'Mit welchem Punkt beginnst du, wenn du eine Gerade zeichnest?');
+    else if(x!==0)wrong2(x,y,'Tipp: Beginne mit dem <b>y-Achsenabschnitt</b> – er liegt auf der y-Achse.');
+    else wrong2(x,y,open.map(f=>f.tHint).join('<br>'));
+    return;
+  }
+  if(st.step==='m'){
+    const f=F[st.cur];
+    if(x===0&&y===f.t)return;
+    if(x!==0&&near(f.m*x+f.t,y)){
+      const pts=`${sx(0)},${sy(f.t)} ${sx(x)},${sy(f.t)} ${sx(x)},${sy(y)}`;
+      el('polygon',{points:pts,class:'trifill '+f.cls+' grow'},b2.extra);
+      el('polyline',{points:pts,class:'tri '+f.cls+' grow'},b2.extra);
+      const run=x, rise=y-f.t;
+      el('text',{x:(sx(0)+sx(x))/2,y:sy(f.t)+(rise>0?15:-6),'text-anchor':'middle',class:'tril',fill:`var(--${f.cls})`},b2.extra,fmt(run));
+      el('text',{x:sx(x)+(run>0?6:-6),y:(sy(f.t)+sy(y))/2+4,'text-anchor':run>0?'start':'end',class:'tril',fill:`var(--${f.cls})`},b2.extra,fmt(rise));
+      drawPoint(b2,x,y,f.pc,'');
+      st.p2=[x,y];st.step='line';st.err=0;
+      rings=[[0,f.t],[x,y]].map(([a,c])=>el('circle',{cx:sx(a),cy:sy(c),r:12,class:'ring',stroke:`var(--${f.cls})`},b2.top));
+      fb('fb2','ok','Das Steigungsdreieck passt! Verbinde jetzt die beiden Punkte.');
+    }else{
+      if(st.err===0)wrong2(x,y,`Dieser Punkt liegt nicht auf dem Graphen von ${f.name}. Wie hilft dir die Steigung m?`);
+      else wrong2(x,y,f.mHint);
+    }
+  }
+}
+function connected(){
+  const f=F[st.cur];
+  rings.forEach(r=>r.remove());rings=[];
+  drawLine(b2,f.m,f.t,f.lc,f.name);
+  st.done[st.cur]=true;st.cur=null;st.p2=null;st.err=0;
+  if(st.done[0]&&st.done[1]){
+    st.step='s';show('s2box');
+    fb('fb2','ok','Beide Graphen sind fertig! Lies jetzt den Schnittpunkt S ab.');
+  }else{
+    st.step='t';
+    const other=F[st.done[0]?1:0].name;
+    fb('fb2','ok',`Graph von ${f.name} ist fertig! Jetzt ist <b>${other}</b> dran.`);
+  }
+}
+function check2(){
+  if(res[2])return;
+  const x=parseNum(a2x.value), y=parseNum(a2y.value);
+  if(isNaN(x)||isNaN(y)){fb('fb2','hint','Trage bitte beide Koordinaten als Zahl ein.');return;}
+  if(near(x,4)&&near(y,1)){
+    markS(b2,4,1);fb('fb2','ok',`${randPraise()} S(4 | 1)`);celebrate(b2.svg);
+    markDone(2,'ok');finish2();
+  }else{
+    errs[2]++;
+    if(near(x,1)&&near(y,4))fb('fb2','bad','x und y vertauscht? Zuerst der x-Wert, dann der y-Wert.');
+    else fb('fb2','bad','Noch nicht. Wo kreuzen sich die blaue und die orange Gerade?');
+    show('sol2row');
+  }
+}
+function reveal2(){
+  markS(b2,4,1);a2x.value='4';a2y.value='1';
+  fb('fb2','hint','Lösung: S(4 | 1). Probe: f(4) = −2 + 3 = 1 und g(4) = 4 − 3 = 1.');
+  markDone(2,'shown');finish2();
+}
+function finish2(){hide('chk2');hide('sol2row');hide('reset2');show('next2');}
+initBoard2();st=newState();
+
+/* ---------- Aufgabe 3 ---------- */
+function showB3(){
+  if(!document.getElementById('b3').childNodes.length){
+    const b3=setupBoard('b3');
+    drawLine(b3,3,-4,'lf','f');drawLine(b3,-1,6,'lg','g');markS(b3,2.5,3.5);
+  }
+  show('b3box');
+}
+function check3(){
+  if(res[3])return;
+  const x=parseNum(a3x.value), y=parseNum(a3y.value);
+  if(isNaN(x)||isNaN(y)){fb('fb3','hint','Trage bitte beide Koordinaten als Zahl ein (z.&nbsp;B. 1,5).');return;}
+  if(near(x,2.5)&&near(y,3.5)){
+    fb('fb3','ok',`${randPraise()} S(2,5 | 3,5)`);celebrate(document.getElementById('c3'));
+    markDone(3,'ok');hide('chk3');hide('sol3row');show('next3');showB3();
+  }else{
+    errs[3]++;
+    if(near(x,2.5))fb('fb3','bad','Der x-Wert stimmt schon! Setze x = 2,5 in f(x) oder g(x) ein, um y zu berechnen.');
+    else if(errs[3]===1)fb('fb3','bad','Noch nicht. Tipp: Im Schnittpunkt haben beide Funktionen denselben Wert. Setze die Terme gleich: <b>3x − 4 = −x + 6</b>');
+    else fb('fb3','bad','Tipp: 3x − 4 = −x + 6 &nbsp;| +x &nbsp;| +4 &nbsp;⇒&nbsp; 4x = 10');
+    if(errs[3]>=2)show('sol3row');
+  }
+}
+function reveal3(){
+  a3x.value='2,5';a3y.value='3,5';
+  fb('fb3','hint','Lösung:<br>3x − 4 = −x + 6 &nbsp;⇒&nbsp; 4x = 10 &nbsp;⇒&nbsp; x = 2,5<br>y = f(2,5) = 3 · 2,5 − 4 = 3,5<br>S(2,5 | 3,5)');
+  markDone(3,'shown');hide('chk3');hide('sol3row');show('next3');showB3();
+}
+
+/* ---------- Aufgabe 4 ---------- */
+let help4=false, err4a=0, err4b=0;
+['optA','optB'].forEach(id=>{
+  document.querySelectorAll('#'+id+' button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+    });
+  });
+});
+const selVal=id=>{const b=document.querySelector('#'+id+' button.sel');return b?b.dataset.v:null;};
+function lock4a(){
+  ['optA','optB'].forEach(id=>document.querySelectorAll('#'+id+' button').forEach(b=>{
+    b.disabled=true;b.classList.remove('sel');if(b.dataset.v==='1')b.classList.add('right');}));
+  hide('chk4a');hide('sol4arow');show('p4b');
+}
+function check4a(){
+  const a=selVal('optA'), b=selVal('optB');
+  if(a===null||b===null){fb('fb4a','hint','Wähle bei beiden Angeboten einen Term aus.');return;}
+  if(a==='1'&&b==='1'){fb('fb4a','ok',`${randPraise()} Beide Terme passen.`);lock4a();return;}
+  err4a++;errs[4]++;
+  let msg=a==='1'?'Der Term ohne Karte stimmt. Schau dir die Jahreskarte noch einmal an.':b==='1'?'Der Term mit Jahreskarte stimmt. Schau dir „ohne Karte“ noch einmal an.':'Noch nicht.';
+  msg+=' Tipp: Was zahlt man <b>einmalig</b> (y-Achsenabschnitt t) und was <b>pro Besuch</b> (Steigung m)?';
+  fb('fb4a','bad',msg);
+  if(err4a>=2)show('sol4arow');
+}
+function reveal4a(){
+  help4=true;
+  fb('fb4a','hint','Lösung: Ohne Karte y = 4x (kein fester Betrag, 4 € pro Besuch). Mit Jahreskarte y = 1,5x + 30 (30 € einmalig, 1,50 € pro Besuch).');
+  lock4a();
+}
+function check4b(){
+  if(res[4])return;
+  const x=parseNum(a4x.value), y=parseNum(a4y.value), z=parseNum(a4z.value);
+  if(isNaN(x)||isNaN(y)||isNaN(z)){fb('fb4b','hint','Fülle bitte alle drei Felder mit einer Zahl aus.');return;}
+  const okx=near(x,12), oky=near(y,48), okz=near(z,13);
+  if(okx&&oky&&okz){
+    fb('fb4b','ok',`${randPraise()} Bei 12 Besuchen kosten beide 48 €. Ab dem 13. Besuch ist die Jahreskarte günstiger.`);
+    celebrate(document.getElementById('c4'));
+    markDone(4,help4?'shown':'ok');hide('chk4b');hide('sol4brow');show('next4');return;
+  }
+  err4b++;errs[4]++;
+  let msg;
+  if(!okx)msg=err4b===1?'Die Anzahl der Besuche stimmt noch nicht. Tipp: Setze die beiden Terme gleich: <b>4x = 1,5x + 30</b>':'Tipp: 4x = 1,5x + 30 &nbsp;| −1,5x &nbsp;⇒&nbsp; 2,5x = 30';
+  else if(!oky)msg='Die Besuche stimmen! Setze x = 12 in einen der beiden Terme ein, um die Kosten zu berechnen.';
+  else msg=near(z,12)?'Bei 12 Besuchen kosten beide <b>gleich viel</b>. Günstiger ist die Karte erst danach.':'b) stimmt! Überlege: Welches Angebot ist nach dem gleichen Preis günstiger – und ab welchem Besuch?';
+  fb('fb4b','bad',msg);
+  if(err4b>=2)show('sol4brow');
+}
+function reveal4b(){
+  a4x.value='12';a4y.value='48';a4z.value='13';
+  fb('fb4b','hint','Lösung:<br>4x = 1,5x + 30 &nbsp;⇒&nbsp; 2,5x = 30 &nbsp;⇒&nbsp; x = 12<br>y = 4 · 12 = 48 €<br>Ab dem <b>13. Besuch</b> ist die Jahreskarte günstiger.');
+  markDone(4,'shown');hide('chk4b');hide('sol4brow');show('next4');
+}
+
+/* ---------- Auswertung ---------- */
+function finish(){
+  clearInterval(timerId);
+  const secs=Math.floor((Date.now()-t0)/1000);
+  const names=['','1 · Ablesen','2 · Zeichnen','3 · Rechnen','4 · Anwenden'];
+  let ok=0,html='',stars='';
+  for(let i=1;i<=N;i++){
+    const good=res[i]==='ok';if(good)ok++;
+    stars+=good?'<span>⭐</span>':'<span class="off">⭐</span>';
+    html+=`<li><span>${names[i]}</span><span>${good?'✓ gelöst':'Lösung angesehen'}</span></li>`;
+  }
+  document.getElementById('stars').innerHTML=stars;
+  document.getElementById('sumlist').innerHTML=html;
+  document.getElementById('score').textContent=`${ok} von ${N} Aufgaben selbst gelöst`;
+  document.getElementById('endtitle').textContent=ok===N?'Perfekt!':ok>=3?'Gut gemacht!':'Geschafft – weiter üben!';
+  document.getElementById('timeinfo').textContent=`Zeit: ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')} min · Fehlversuche: ${errs[1]+errs[2]+errs[3]+errs[4]}`;
+  go(5);
+  if(ok===N)setTimeout(()=>celebrate(document.getElementById('stars')),300);
+}
+</script>
+</body>
+</html>
